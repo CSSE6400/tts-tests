@@ -8,4 +8,4 @@ fi
 
 export ENDPOINT=$1
 
-k6 run ./functionality.js
+k6 run ./api-conformance.js
