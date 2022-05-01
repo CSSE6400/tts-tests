@@ -17,7 +17,7 @@ const createLJTacoTron = () => ({
     name: 'tts_models.en.ljspeech.tacotron2-DDC',
     description: 'Tacotron2 with Double Decoder Consistency.',
     author: 'Eren Gölge @erogol',
-    license: 'MIT',
+    license: '',
     url: 'https://coqui.gateway.scarf.sh/v0.0.12/tts_models--en--ljspeech--tacotron2-DDC.zip',
 });
 
