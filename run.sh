@@ -9,3 +9,4 @@ fi
 export ENDPOINT=$1
 
 k6 run ./api-conformance.js
+k6 run ./processing.js
