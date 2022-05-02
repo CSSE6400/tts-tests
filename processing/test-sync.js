@@ -1,6 +1,5 @@
 import http from "k6/http";
 import { group, check } from "k6";
-import crypto from "k6/crypto";
 import _ from "https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js";
 
 const ENDPOINT = __ENV.ENDPOINT;
@@ -45,18 +44,18 @@ function downloadAudio(url) {
     return request.body;
 }
 
-function testSyncAudio(message, model, hash, extraTime = 0) {
+function testSyncAudio(message, model, expected, extraTime = 0) {
     let audioUrl = generateAudioAndValidateResponse(message, model, extraTime);
     if (audioUrl === null) {
         return;
     }
 
     let audio = downloadAudio(audioUrl);
-    let audioHash = crypto.md5(audio, "hex");
+    let audioLength = audio.byteLength;
 
-    // console.log(`message: ${message} hash: ${audioHash}, expected: ${hash}`);
-    check(audioHash, {
-        "MD5 hash of audio matches": (h) => h === hash,
+    // console.log(`message: ${message} length: ${audioLength}, expected: ${expected}`);
+    check(audioLength, {
+        "Length of audio matches": (h) => h === expected,
     });
 }
 
@@ -66,7 +65,7 @@ export default function() {
             testSyncAudio(
                 "Hello CSSE6400",
                 "tts_models.en.ljspeech.glow-tts",
-                "f8496799263bee55b309a6a395c1c99b"
+                83532
             );
         });
 
@@ -74,15 +73,7 @@ export default function() {
             testSyncAudio(
                 "Roads? Where we're going, we don't need roads!",
                 "tts_models.en.ljspeech.fast_pitch",
-                "0af94c710cc4aa047ecb11a12b65ad03"
-            );
-        });
-
-        group("Generate 'I'll be back'", () => {
-            testSyncAudio(
-                "I'll be back",
-                "tts_models.en.ljspeech.glow-tts",
-                "b28e82944a43145949aba0be2a34d97b"
+                137292
             );
         });
 
@@ -90,7 +81,7 @@ export default function() {
             testSyncAudio(
                 "To thine own self be true",
                 "tts_models.en.ljspeech.fast_pitch",
-                "2e7c6679812b08385ec604dfef6b6e59"
+                100940
             );
         });
 
@@ -98,7 +89,7 @@ export default function() {
             testSyncAudio(
                 "Toto, I've a feeling we're not in Kansas anymore",
                 "tts_models.en.ljspeech.glow-tts",
-                "a8b94bc1eb5c0e2972645ecb1df2ff9e"
+                170572
             );
         });
 
@@ -106,23 +97,7 @@ export default function() {
             testSyncAudio(
                 "I'm going to make him an offer he can't refuse",
                 "tts_models.en.ljspeech.fast_pitch",
-                "daabd59a835effd87adfee0b20aa720b"
-            );
-        });
-
-        group("Generate 'Bond. James Bond'", () => {
-            testSyncAudio(
-                "Bond. James Bond",
-                "tts_models.en.ljspeech.glow-tts",
-                "aa1828981026691ad4828e526e8bfad2",
-            );
-        });
-
-        group("Generate 'May the Force be with you'", () => {
-            testSyncAudio(
-                "May the Force be with you",
-                "tts_models.en.ljspeech.fast_pitch",
-                "b579f547260e9a38d338877c4cda98ab"
+                149580
             );
         });
     });

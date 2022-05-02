@@ -64,7 +64,7 @@ function pollForAudio(requestID) {
     return null;
 }
 
-function testAsyncAudio(message, model, hash) {
+function testAsyncAudio(message, model, expected) {
     let requestID = requestAudioGeneration(message, model);
     if (requestID === null) {
         return;
@@ -86,11 +86,11 @@ function testAsyncAudio(message, model, hash) {
     }
 
     let audio = downloadAudio(audioUrl);
-    let audioHash = crypto.md5(audio, "hex");
+    let audioLength = audio.byteLength;
 
-    // console.log(`message: ${message} hash: ${audioHash}, expected: ${hash}`);
-    check(audioHash, {
-        "MD5 hash of audio matches": (h) => h === hash,
+    // console.log(`message: ${message} length: ${audioLength}, expected: ${expected}`);
+    check(audioLength, {
+        "Length of audio matches": (h) => h === expected,
     });
 }
 
@@ -112,7 +112,7 @@ export default function() {
             testAsyncAudio(
                 "Hello CSSE6400",
                 "tts_models.en.ljspeech.glow-tts",
-                "f8496799263bee55b309a6a395c1c99b"
+                83532
             );
         });
 
@@ -120,15 +120,7 @@ export default function() {
             testAsyncAudio(
                 "Roads? Where we're going, we don't need roads!",
                 "tts_models.en.ljspeech.fast_pitch",
-                "0af94c710cc4aa047ecb11a12b65ad03"
-            );
-        });
-
-        group("Generate 'I'll be back'", () => {
-            testAsyncAudio(
-                "I'll be back",
-                "tts_models.en.ljspeech.glow-tts",
-                "b28e82944a43145949aba0be2a34d97b"
+                137292
             );
         });
 
@@ -136,7 +128,7 @@ export default function() {
             testAsyncAudio(
                 "To thine own self be true",
                 "tts_models.en.ljspeech.fast_pitch",
-                "2e7c6679812b08385ec604dfef6b6e59"
+                100940
             );
         });
 
@@ -144,7 +136,7 @@ export default function() {
             testAsyncAudio(
                 "Toto, I've a feeling we're not in Kansas anymore",
                 "tts_models.en.ljspeech.glow-tts",
-                "a8b94bc1eb5c0e2972645ecb1df2ff9e"
+                170572
             );
         });
 
@@ -152,23 +144,7 @@ export default function() {
             testAsyncAudio(
                 "I'm going to make him an offer he can't refuse",
                 "tts_models.en.ljspeech.fast_pitch",
-                "daabd59a835effd87adfee0b20aa720b"
-            );
-        });
-
-        group("Generate 'Bond. James Bond'", () => {
-            testAsyncAudio(
-                "Bond. James Bond",
-                "tts_models.en.ljspeech.glow-tts",
-                "aa1828981026691ad4828e526e8bfad2",
-            );
-        });
-
-        group("Generate 'May the Force be with you'", () => {
-            testAsyncAudio(
-                "May the Force be with you",
-                "tts_models.en.ljspeech.fast_pitch",
-                "b579f547260e9a38d338877c4cda98ab"
+                149580
             );
         });
     });
@@ -178,7 +154,7 @@ export default function() {
             testAsyncAudio(
                 MESSAGES["Dickens"],
                 "tts_models.en.ljspeech.glow-tts",
-                "9b4227c23cd041bc3eafec3624e3d004"
+                1795660
             );
         });
 
@@ -186,7 +162,7 @@ export default function() {
             testAsyncAudio(
                 MESSAGES["Austen"],
                 "tts_models.en.ljspeech.fast_pitch",
-                "091dad252bf5948ad8d48ff99b39c3ef"
+                941676
             )
         });
 
@@ -194,7 +170,7 @@ export default function() {
             testAsyncAudio(
                 MESSAGES["HillHouse"],
                 "tts_models.en.ljspeech.glow-tts",
-                "a0a5206b7993ebfe6d3a6153d5862a06"
+                1591948
             )
         });
 
@@ -202,7 +178,7 @@ export default function() {
             testAsyncAudio(
                 MESSAGES["Shakespeare"],
                 "tts_models.en.ljspeech.fast_pitch",
-                "430693e892e07baeb93637c997c91bda"
+                1525388
             )
         });
 
@@ -210,7 +186,7 @@ export default function() {
             testAsyncAudio(
                 MESSAGES["King"],
                 "tts_models.en.ljspeech.glow-tts",
-                "5255c67497ced8cbfd7a598288a6917f"
+                2141420
             )
         });
 
@@ -218,7 +194,7 @@ export default function() {
             testAsyncAudio(
                 MESSAGES["Fitzgerald"],
                 "tts_models.en.ljspeech.fast_pitch",
-                "68883081f1429018842bc784ed80ffc2"
+                1151628
             )
         });
     });
@@ -227,7 +203,7 @@ export default function() {
         testAsyncAudio(
             LARGE,
             "tts_models.en.ljspeech.glow-tts",
-            "7c8abb0029cdb0c4b56c7fcb6c4361ff"
+            62248716
         );
     });
 }
