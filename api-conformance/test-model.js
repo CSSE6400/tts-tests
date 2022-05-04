@@ -1,9 +1,12 @@
 import http from "k6/http";
 import { group, check } from "k6";
+import { Rate } from "k6/metrics";
 import _ from "https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js";
 
 const ENDPOINT = __ENV.ENDPOINT;
 const BASE_URL = ENDPOINT;
+
+const conformance = new Rate("conformance");
 
 const createEk1TacoTron = () => ({
     name: 'tts_models.en.ek1.tacotron2',
@@ -42,9 +45,9 @@ export default function() {
     group("/model", () => {
         {
             let url = BASE_URL + `/model`;
-            let request = http.get(url);
+            let request = http.get(url, { tags: { endpoint: "/model", test: "conformance" } });
 
-            check(request, {
+            let success = check(request, {
                 "Response code of 200 (healthy)": (r) => r.status === 200,
                 "Array of at least 4 elements returned": (r) => r.json().length >= 4,
                 "All elements are strings": (r) => _.every(r.json(), (e) => typeof e === 'string'),
@@ -53,7 +56,8 @@ export default function() {
                 "One element is 'tts_models.en.ljspeech.glow-tts'": (r) => _.includes(r.json(), 'tts_models.en.ljspeech.glow-tts'),
                 "One element is 'tts_models.en.ljspeech.fast_pitch'": (r) => _.includes(r.json(), 'tts_models.en.ljspeech.fast_pitch'),
                 "All elements are unique": (r) => _.uniq(r.json()).length === r.json().length,
-            });
+            }, {endpoint: "/model", test: "conformance"});
+            conformance.add(success, {endpoint: "/model"});
         }
     });
 
@@ -62,99 +66,76 @@ export default function() {
             let id = 'tts_models.en.ek1.tacotron2';
 
             let url = BASE_URL + `/model/${id}`;
-            let request = http.get(url);
+            let request = http.get(url, { tags: { endpoint: "/model/{id}", test: "conformance" } });
 
             let expected = createEk1TacoTron();
 
-            check(request, {
-                "Response code of 200 (healthy)": (r) => r.status === 200
-            });
-
-            check(request, {
-                "Response is an object": (r) => _.isObject(r.json())
-            });
-
-            // check contents of model
-            check(request, {
+            let success = check(request, {
+                "Response code of 200 (healthy)": (r) => r.status === 200,
+                "Response is an object": (r) => _.isObject(r.json()),
                 "Correct response": (r) => _.isEqual(r.json(), expected)
-            });
+            }, {endpoint: "/model/{id}", test: "conformance"});
+            conformance.add(success, {endpoint: "/model/{id}"});
         });
 
         group("test tts_models.en.ljspeech.tacotron2-DDC response", () => {
             let id = 'tts_models.en.ljspeech.tacotron2-DDC';
 
             let url = BASE_URL + `/model/${id}`;
-            let request = http.get(url);
+            let request = http.get(url, { tags: { endpoint: "/model/{id}", test: "conformance" } });
 
             let expected = createLJTacoTron();
 
-            check(request, {
-                "Response code of 200 (healthy)": (r) => r.status === 200
-            });
-
-            check(request, {
-                "Response is an object": (r) => _.isObject(r.json())
-            });
-
-            // check contents of model
-            check(request, {
+            let success = check(request, {
+                "Response code of 200 (healthy)": (r) => r.status === 200,
+                "Response is an object": (r) => _.isObject(r.json()),
                 "Correct response": (r) => _.isEqual(r.json(), expected)
-            });
+            }, {endpoint: "/model/{id}", test: "conformance"});
+            conformance.add(success, {endpoint: "/model/{id}"});
         });
 
         group("test tts_models.en.ljspeech.glow-tts response", () => {
             let id = 'tts_models.en.ljspeech.glow-tts';
 
             let url = BASE_URL + `/model/${id}`;
-            let request = http.get(url);
+            let request = http.get(url, { tags: { endpoint: "/model/{id}", test: "conformance" } });
 
             let expected = createLJGlowTts();
 
-            check(request, {
-                "Response code of 200 (healthy)": (r) => r.status === 200
-            });
-
-            check(request, {
-                "Response is an object": (r) => _.isObject(r.json())
-            });
-
-            // check contents of model
-            check(request, {
+            let success = check(request, {
+                "Response code of 200 (healthy)": (r) => r.status === 200,
+                "Response is an object": (r) => _.isObject(r.json()),
                 "Correct response": (r) => _.isEqual(r.json(), expected)
-            });
+            }, {endpoint: "/model/{id}", test: "conformance"});
+            conformance.add(success, {endpoint: "/model/{id}"});
         });
 
         group("test tts_models.en.ljspeech.fast_pitch response", () => {
             let id = 'tts_models.en.ljspeech.fast_pitch';
 
             let url = BASE_URL + `/model/${id}`;
-            let request = http.get(url);
+            let request = http.get(url, { tags: { endpoint: "/model/{id}", test: "conformance" } });
 
             let expected = createLJFastPitch();
 
-            check(request, {
-                "Response code of 200 (healthy)": (r) => r.status === 200
-            });
-
-            check(request, {
-                "Response is an object": (r) => _.isObject(r.json())
-            });
-
-            // check contents of model
-            check(request, {
+            let success = check(request, {
+                "Response code of 200 (healthy)": (r) => r.status === 200,
+                "Response is an object": (r) => _.isObject(r.json()),
                 "Correct response": (r) => _.isEqual(r.json(), expected)
-            });
+            }, {endpoint: "/model/{id}", test: "conformance"});
+            conformance.add(success, {endpoint: "/model/{id}"});
         });
 
         group("test unknown model response", () => {
             let id = 'tts_models.en.unknown';
 
             let url = BASE_URL + `/model/${id}`;
-            let request = http.get(url);
+            let request = http.get(url, { tags: { endpoint: "/model/{id}", test: "conformance" } });
 
-            check(request, {
+            let success = check(request, {
                 "Response code of 404 (not found)": (r) => r.status === 404
-            });
+            }, {endpoint: "/model/{id}", test: "conformance"});
+            conformance.add(success, {endpoint: "/model/{id}"});
         });
     });
 

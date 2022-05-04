@@ -1,6 +1,6 @@
 import http from "k6/http";
 import { group, check, fail, sleep } from "k6";
-import crypto from "k6/crypto";
+import { Rate } from "k6/metrics";
 import _ from "https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js";
 
 const ENDPOINT = __ENV.ENDPOINT;
@@ -11,6 +11,8 @@ const DEFAULT_TIMEOUT = 20; // seconds
 const WAIT_TIME = 240; // seconds (4 minutes)
 const POLL_INTERVAL = 5; // seconds
 
+const processing = new Rate("processing");
+
 function requestAudioGeneration(message, model) {
     let body = {
         "message": message,
@@ -20,14 +22,15 @@ function requestAudioGeneration(message, model) {
     let timeout = DEFAULT_TIMEOUT
     let params = {
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        timeout: `${timeout}s`
+        timeout: `${timeout}s`,
+        tags: { operation: "async", test: "processing", action: "request" }
     };
     let request = http.post(url, JSON.stringify(body), params);
 
     let failed = !check(request, {
         "Response code of post request is 200 (healthy)": (r) => r.status === 200,
         "Response has an id field": (r) => r.json().id,
-    });
+    }, { operation: "async", test: "processing" });
     if (failed) {
         return null;
     }
@@ -36,19 +39,21 @@ function requestAudioGeneration(message, model) {
 }
 
 function downloadAudio(url) {
-    let params = { headers: { 'Accept': 'audio/wav' }, responseType: 'binary' };
+    let params = { headers: { 'Accept': 'audio/wav' }, responseType: 'binary',
+                   tags: { operation: "async", test: "processing", action: "download" } };
     let request = http.get(url, params);
 
     check(request, {
         "Response code of resource link is 200 (healthy)": (r) => r.status === 200,
-    });
+    }, { operation: "async", test: "processing" });
 
     return request.body;
 }
 
 function pollForAudio(requestID) {
     let audioUrl = `${url}/${requestID}`;
-    let params = { headers: { 'Accept': 'application/json' } };
+    let params = { headers: { 'Accept': 'application/json' },
+                   tags: { operation: "async", test: "processing", action: "poll" } };
     let request = http.get(audioUrl, params);
 
     let ready = request.json().status === "COMPLETED";
@@ -57,16 +62,20 @@ function pollForAudio(requestID) {
             "Response code of resource link is 200 (healthy)": (r) => r.status === 200,
             "Status field is 'COMPLETED'": (r) => r.json().status === "COMPLETED",
             "Resource field is a string": (r) => _.isString(r.json().resource),
-        });
+        }, { operation: "async", test: "processing" });
         return request.json().resource;
     }
 
     return null;
 }
 
-function testAsyncAudio(message, model, expected) {
+function testAsyncAudio(message, model, expected, label=null) {
+    if (label === null) {
+        label = message;
+    }
     let requestID = requestAudioGeneration(message, model);
     if (requestID === null) {
+        processing.add(0, { operation: "async", message: label, model: model });
         return;
     }
 
@@ -79,6 +88,7 @@ function testAsyncAudio(message, model, expected) {
             let elapsedTime = Date.now() - startTime;
             if (elapsedTime > WAIT_TIME * 1000) {
                 fail(`Audio generation timed out after ${WAIT_TIME} seconds`);
+                processing.add(0, { operation: "async", message: label, model: model });
                 return;
             }
             sleep(POLL_INTERVAL);
@@ -89,9 +99,10 @@ function testAsyncAudio(message, model, expected) {
     let audioLength = audio.byteLength;
 
     // console.log(`message: ${message} length: ${audioLength}, expected: ${expected}`);
-    check(audioLength, {
+    let success = check(audioLength, {
         "Length of audio matches": (h) => h === expected,
-    });
+    }, {operation: "async", message: label, model: model, test: "processing"});
+    processing.add(success, { operation: "async", message: label, model: model });
 }
 
 const MESSAGES = {
@@ -154,7 +165,8 @@ export default function() {
             testAsyncAudio(
                 MESSAGES["Dickens"],
                 "tts_models.en.ljspeech.glow-tts",
-                1795660
+                1795660,
+                "A Tale of Two Cities"
             );
         });
 
@@ -162,7 +174,8 @@ export default function() {
             testAsyncAudio(
                 MESSAGES["Austen"],
                 "tts_models.en.ljspeech.fast_pitch",
-                941676
+                941676,
+                "Pride and Prejudice"
             )
         });
 
@@ -170,7 +183,8 @@ export default function() {
             testAsyncAudio(
                 MESSAGES["HillHouse"],
                 "tts_models.en.ljspeech.glow-tts",
-                1591948
+                1591948,
+                "Haunting of Hill House"
             )
         });
 
@@ -178,7 +192,8 @@ export default function() {
             testAsyncAudio(
                 MESSAGES["Shakespeare"],
                 "tts_models.en.ljspeech.fast_pitch",
-                1525388
+                1525388,
+                "Hamlet"
             )
         });
 
@@ -186,7 +201,8 @@ export default function() {
             testAsyncAudio(
                 MESSAGES["King"],
                 "tts_models.en.ljspeech.glow-tts",
-                2141420
+                2141420,
+                "The Body"
             )
         });
 
@@ -194,7 +210,8 @@ export default function() {
             testAsyncAudio(
                 MESSAGES["Fitzgerald"],
                 "tts_models.en.ljspeech.fast_pitch",
-                1151628
+                1151628,
+                "The Great Gatsby"
             )
         });
     });
@@ -203,7 +220,8 @@ export default function() {
         testAsyncAudio(
             LARGE,
             "tts_models.en.ljspeech.glow-tts",
-            62248716
+            62248716,
+            "Gullivers Travels"
         );
     });
 }
