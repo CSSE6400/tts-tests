@@ -5,6 +5,7 @@ import _ from "https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js";
 
 import { checkModelList, checkModel } from "./checks/model.js";
 import { checkTextList, checkText } from "./checks/text.js";
+import { testAsyncAudio } from "./requests/async.js";
 
 const ENDPOINT = __ENV.ENDPOINT;
 const BASE_URL = ENDPOINT;
@@ -18,19 +19,16 @@ export const options = {
             executor: "ramping-vus",
             stages: [
                 { duration: "8m", target: 1000 },
-                { duration: "4m", target: 3500 },
-                { duration: "5m", target: 3500 },
+                { duration: "4m", target: 2000 },
+                { duration: "5m", target: 2000 },
                 { duration: "5m", target: 0 },
             ],
             exec: 'studyingStudent',
         },
         teacher: {
-            executor: "ramping-vus",
-            stages: [
-                { duration: "10m", target: 30 },
-                { duration: "10m", target: 0 },
-            ],
-            minIterationDuration: '1200s', // should only ever had 30 staff uploads (20 * 60)
+            executor: "shared-iterations", // should only ever have 30 uploads
+            vus: 5,
+            iterations: 30,
             exec: 'uploadingTeacher',
         },
     },
@@ -85,5 +83,5 @@ export function uploadingTeacher() {
     );
 
     // Excellent, I've uploaded my stuff, home time!
-    sleep(1200);
+    sleep(100);
 }
