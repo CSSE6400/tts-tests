@@ -98,7 +98,7 @@ function testAsyncAudio(message, model, expected, label=null) {
     let audio = downloadAudio(audioUrl);
     let audioLength = audio.byteLength;
 
-    // console.log(`message: ${message} length: ${audioLength}, expected: ${expected}`);
+    console.log(`message: ${message} length: ${audioLength}, expected: ${expected}`);
     let success = check(audioLength, {
         "Length of audio matches": (h) => h === expected,
     }, {operation: "async", message: label, model: model, test: "processing"});
@@ -115,7 +115,7 @@ const MESSAGES = {
 };
 
 // load a very large message from a file
-const LARGE = open("gulliver.txt");
+const LARGE = open("gulliver-trimmed.txt");
 
 export default function() {
     group("Test async small", () => {
@@ -220,7 +220,7 @@ export default function() {
         testAsyncAudio(
             LARGE,
             "tts_models.en.ljspeech.glow-tts",
-            62248716,
+            26393004,
             "Gullivers Travels"
         );
     });
