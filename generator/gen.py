@@ -5,10 +5,10 @@ import subprocess
 from faker import Faker
 
 DATA = [
-    ('course-material', 2500, 5), # should be 20
-    ('monday-announcement', 80, 75),
-    ('reading-lists', 7000, 100),
-    ('revision-material', 3500, 30),
+    ('course-material', 2500, 20), # should be 20
+    ('monday-announcement', 80, 75), # should be 75
+    ('reading-lists', 7000, 100), # should be 100
+    ('revision-material', 3500, 30), # should be 30
 ]
 
 for name, characters, generate_count in DATA:
