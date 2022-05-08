@@ -1,6 +1,8 @@
 import http from "k6/http";
 import { check, sleep } from "k6";
 import { Rate } from "k6/metrics";
+import { SharedArray } from 'k6/data';
+
 import _ from "https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js";
 
 import { checkModelList, checkModel } from "./checks/model.js";
@@ -70,16 +72,18 @@ export function studyingStudent() {
     sleep(120);
 }
 
-// about 3500 characters each
-const courseSummaries = [
-
-];
+const revision_material = new SharedArray('revision-material', function () {
+    return JSON.parse(open('./data/revision-material.json'));
+});
 
 export function uploadingTeacher() {
+    // decide on content to upload
+    const content = revision_material[Math.floor(Math.random() * revision_material.length)];
+
     testAsyncAudio(
-        "Hello CSSE6400",
+        content[0],
         "tts_models.en.ljspeech.glow-tts",
-        83532
+        content[1]
     );
 
     // Excellent, I've uploaded my stuff, home time!

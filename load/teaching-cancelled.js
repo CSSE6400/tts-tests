@@ -17,7 +17,7 @@ export const options = {
     scenarios: {
         teacher: {
             executor: "shared-iterations", // should only ever have 1,957 uploads
-            vus: 10,
+            vus: 20,
             iterations: 1957,
             exec: 'sendAnnouncement',
         },
@@ -26,7 +26,7 @@ export const options = {
         test: "load",
         Qscenario: "teaching-cancelled",
     },
-    minIterationDuration: '20s'
+    minIterationDuration: '5s'
 };
 
 export function sendAnnouncement() {

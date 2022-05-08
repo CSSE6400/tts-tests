@@ -1,6 +1,8 @@
 import http from "k6/http";
 import { check, sleep } from "k6";
 import { Rate } from "k6/metrics";
+import { SharedArray } from 'k6/data';
+
 import _ from "https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js";
 
 import { checkModelList, checkModel } from "./checks/model.js";
@@ -16,8 +18,8 @@ export const options = {
     rps: 50,
     scenarios: {
         newcourse: {
-            executor: "shared-iterations", // should only ever have 1,957 uploads
-            vus: 2,
+            executor: "shared-iterations", // should only ever have 20
+            vus: 4,
             iterations: 20,
             exec: 'uploadContent',
         },
@@ -30,27 +32,40 @@ export const options = {
     },
     tags: {
         test: "load",
-        Qscenario: "teaching-cancelled",
+        Qscenario: "monday-in-semester",
     },
     minIterationDuration: '20s'
 };
 
+const course_material = new SharedArray('course-material', function () {
+    return JSON.parse(open('./data/course-material.json'));
+});
+const monday_announcement = new SharedArray('monday-announcement', function () {
+    return JSON.parse(open('./data/monday-announcement.json'));
+});
+
 export function uploadContent() {
+    // decide on content to upload
+    const content = course_material[Math.floor(Math.random() * course_material.length)];
+
     // should be around 2500 characters
     testAsyncAudio(
-        "Dear class, The university has decided to cancel all classes (both on-line and in-person) for the remainter fo the week. We will let you know about how these classes will be caught up when the university informs us further. Thank you for your patience and understanding.",
+        content[0],
         "tts_models.en.ljspeech.glow-tts",
-        804492
+        content[1]
     );
 
     // Excellent, I've uploaded my stuff, home time!
 }
 
 export function sendAnnouncement() {
+    // decide on an announcement
+    const content = monday_announcement[Math.floor(Math.random() * monday_announcement.length)];
+
     testAsyncAudio(
-        "Dear class, The university has decided to cancel all classes (both on-line and in-person) for the remainter fo the week. We will let you know about how these classes will be caught up when the university informs us further. Thank you for your patience and understanding.",
+        content[0],
         "tts_models.en.ljspeech.glow-tts",
-        804492
+        content[1]
     );
 
     // Excellent, I've uploaded my stuff, home time!

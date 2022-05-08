@@ -1,6 +1,8 @@
 import http from "k6/http";
 import { check, sleep } from "k6";
 import { Rate } from "k6/metrics";
+import { SharedArray } from 'k6/data';
+
 import _ from "https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js";
 
 import { checkModelList, checkModel } from "./checks/model.js";
@@ -24,17 +26,24 @@ export const options = {
     },
     tags: {
         test: "load",
-        Qscenario: "teaching-cancelled",
+        Qscenario: "reading-list",
     },
     minIterationDuration: '20s'
 };
 
+const reading_lists = new SharedArray('reading-lists', function () {
+    return JSON.parse(open('./data/reading-lists.json'));
+});
+
 export function submitReadingList() {
+    // decide on content to upload
+    const content = reading_lists[Math.floor(Math.random() * reading_lists.length)];
+
     // should be around 7000 characters
     testAsyncAudio(
-        "Dear class, The university has decided to cancel all classes (both on-line and in-person) for the remainter fo the week. We will let you know about how these classes will be caught up when the university informs us further. Thank you for your patience and understanding.",
+        content[0],
         "tts_models.en.ljspeech.glow-tts",
-        804492
+        content[1]
     );
 
     // Excellent, I've uploaded my stuff, home time!
