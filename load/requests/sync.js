@@ -58,7 +58,7 @@ export function testSyncAudio(message, model, expected, extraTime = 0) {
     let audio = downloadAudio(audioUrl);
     let audioLength = audio.byteLength;
 
-    console.log(`message: ${message} length: ${audioLength}, expected: ${expected}`);
+    // console.log(`message: ${message} length: ${audioLength}, expected: ${expected}`);
     let success = check(audioLength, {
         "Length of audio matches": (h) => h === expected,
     }, { operation: "sync", message: message, model: model });

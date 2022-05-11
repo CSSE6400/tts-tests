@@ -37,8 +37,11 @@ function requestAudioGeneration(message, model) {
 }
 
 function downloadAudio(url) {
-    let params = { headers: { 'Accept': 'audio/wav' }, responseType: 'binary',
-                   tags: { operation: "async", action: "download" } };
+    let params = {
+        headers: { 'Accept': 'audio/wav' },
+        responseType: 'binary',
+        tags: { operation: "async", action: "download" }
+    };
     let request = http.get(url, params);
 
     check(request, {
@@ -50,8 +53,10 @@ function downloadAudio(url) {
 
 function pollForAudio(requestID) {
     let audioUrl = `${url}/${requestID}`;
-    let params = { headers: { 'Accept': 'application/json' },
-                   tags: { operation: "async", action: "poll" } };
+    let params = {
+        headers: { 'Accept': 'application/json' },
+        tags: { operation: "async", action: "poll" }
+    };
     let request = http.get(audioUrl, params);
 
     let ready = request.json().status === "COMPLETED";
@@ -67,13 +72,13 @@ function pollForAudio(requestID) {
     return null;
 }
 
-export function testAsyncAudio(message, model, expected, label=null) {
+export function testAsyncAudio(message, model, expected, label = null) {
     if (label === null) {
         label = message;
     }
     let requestID = requestAudioGeneration(message, model);
     if (requestID === null) {
-        return;
+        return false;
     }
 
     // Wait for the audio to be generated
@@ -84,8 +89,9 @@ export function testAsyncAudio(message, model, expected, label=null) {
         if (audioUrl === null) {
             let elapsedTime = Date.now() - startTime;
             if (elapsedTime > WAIT_TIME * 1000) {
-                fail(`Audio generation timed out after ${WAIT_TIME} seconds`);
-                return;
+                return check(elapsedTime, {
+                    "Audio generation timed out after 4 minutes": (t) => false,
+                });
             }
             sleep(POLL_INTERVAL);
         }
@@ -94,10 +100,10 @@ export function testAsyncAudio(message, model, expected, label=null) {
     let audio = downloadAudio(audioUrl);
     let audioLength = audio.byteLength;
 
-    console.log(`message: ${message} length: ${audioLength}, expected: ${expected}`);
+    // console.log(`message: ${message} length: ${audioLength}, expected: ${expected}`);
     let success = check(audioLength, {
         "Length of audio matches": (h) => h === expected,
-    }, {operation: "async", message: label, model: model });
+    }, { operation: "async", message: label, model: model });
 
     return success;
 }

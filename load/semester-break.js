@@ -1,7 +1,6 @@
 import http from "k6/http";
 import { check, sleep } from "k6";
 import { Rate } from "k6/metrics";
-import _ from "https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js";
 
 import { checkModelList, checkModel } from "./checks/model.js";
 import { checkTextList, checkText } from "./checks/text.js";
@@ -9,7 +8,8 @@ import { checkTextList, checkText } from "./checks/text.js";
 const ENDPOINT = __ENV.ENDPOINT;
 const BASE_URL = ENDPOINT;
 
-const load = new Rate("load");
+const queries = new Rate("queries");
+const mutations = new Rate("mutations");
 
 export const options = {
     rps: 50,
@@ -49,16 +49,15 @@ export function modelScenario() {
     let request = http.get(url, { tags: { endpoint: "/model" } });
 
     let success = check(request, checkModelList, { endpoint: "/model" });
-    load.add(success, { endpoint: "/model" });
+    queries.add(success, { endpoint: "/model" });
 
     sleep(5);
 
     url = BASE_URL + `/model/tts_models.en.ljspeech.glow-tts`;
     request = http.get(url, { tags: { endpoint: "/model/{id}" } });
 
-    success = check(request, checkModel,
-                    { endpoint: "/model/{id}" });
-    load.add(success, { endpoint: "/model/{id}" });
+    success = check(request, checkModel, { endpoint: "/model/{id}" });
+    queries.add(success, { endpoint: "/model/{id}" });
 
     sleep(5);
 }
@@ -69,7 +68,7 @@ export function textScenario() {
 
     let data = request.json().data;
     let success = check(request, checkTextList, { endpoint: "/text" });
-    load.add(success, { endpoint: "/text" });
+    queries.add(success, { endpoint: "/text" });
 
     sleep(20);
 
@@ -77,7 +76,7 @@ export function textScenario() {
     request = http.get(url, { tags: { endpoint: "/text/{id}" } });
 
     success = check(request, checkText, { endpoint: "/text/{id}" });
-    load.add(success, { endpoint: "/text/{id}" });
+    queries.add(success, { endpoint: "/text/{id}" });
 
     sleep(20);
 }

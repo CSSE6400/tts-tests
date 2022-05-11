@@ -1,15 +1,14 @@
 import http from "k6/http";
 import { check, sleep } from "k6";
 import { Rate } from "k6/metrics";
-import _ from "https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js";
 
-import { checkModelList, checkModel } from "./checks/model.js";
 import { checkTextList, checkText } from "./checks/text.js";
 
 const ENDPOINT = __ENV.ENDPOINT;
 const BASE_URL = ENDPOINT;
 
-const load = new Rate("load");
+const queries = new Rate("queries");
+const mutations = new Rate("mutations");
 
 export const options = {
     rps: 50,
@@ -46,7 +45,7 @@ export function examScenario() {
 
     let data = request.json().data;
     let success = check(request, checkTextList, { endpoint: "/text" });
-    load.add(success, { endpoint: "/text" });
+    queries.add(success, { endpoint: "/text" });
 
     // I've got to find my courses text data in this list!
     // Don't the devs know I have an exam??
@@ -57,15 +56,16 @@ export function examScenario() {
     request = http.get(url, { tags: { endpoint: "/text/{id}" } });
 
     success = check(request, checkText, { endpoint: "/text/{id}" });
-    load.add(success, { endpoint: "/text/{id}" });
+    queries.add(success, { endpoint: "/text/{id}" });
 
     // Now I need to download the audio
     url = request.json().resource;
-    request = http.get(url, { tags: { endpoint: "/download" } });
+    request = http.get(url, { tags: { endpoint: "download" } });
 
     success = check(request, {
         "Status is 200": (r) => r.status === 200,
-    }, { endpoint: "/download" });
+    }, { endpoint: "download" });
+    queries.add(success, { endpoint: "download" });
 
     // Alright I'll listen to this chapter for two minutes
     sleep(120);
