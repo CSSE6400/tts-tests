@@ -5,12 +5,6 @@ import { Rate } from "k6/metrics";
 const ENDPOINT = __ENV.ENDPOINT;
 const BASE_URL = ENDPOINT;
 
-export const options = {
-    tags: {
-        test: "conformance",
-    },
-};
-
 const conformance = new Rate("conformance");
 
 export default function() {

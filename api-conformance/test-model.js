@@ -6,12 +6,6 @@ import _ from "https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js";
 const ENDPOINT = __ENV.ENDPOINT;
 const BASE_URL = ENDPOINT;
 
-export const options = {
-    tags: {
-        test: "conformance",
-    },
-};
-
 const conformance = new Rate("conformance");
 
 const createEk1TacoTron = () => ({

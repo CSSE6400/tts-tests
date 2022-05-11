@@ -11,12 +11,6 @@ const DEFAULT_TIMEOUT = 20; // seconds
 const WAIT_TIME = 240; // seconds (4 minutes)
 const POLL_INTERVAL = 5; // seconds
 
-export const options = {
-    tags: {
-        test: "processing",
-    },
-};
-
 const processing = new Rate("processing");
 
 function requestAudioGeneration(message, model) {

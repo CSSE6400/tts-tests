@@ -7,12 +7,6 @@ const ENDPOINT = __ENV.ENDPOINT;
 const BASE_URL = ENDPOINT;
 const url = BASE_URL + `/text`;
 
-export const options = {
-    tags: {
-        test: "conformance",
-    },
-};
-
 const conformance = new Rate("conformance");
 
 function validateText() {

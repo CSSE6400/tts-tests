@@ -9,12 +9,6 @@ const url = BASE_URL + `/text`;
 
 const DEFAULT_TIMEOUT = 120;
 
-export const options = {
-    tags: {
-        test: "processing",
-    },
-};
-
 const processing = new Rate("processing");
 
 function generateAudioAndValidateResponse(message, model, extraTime) {
