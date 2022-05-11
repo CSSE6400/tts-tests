@@ -9,6 +9,12 @@ const url = BASE_URL + `/text`;
 
 const DEFAULT_TIMEOUT = 120;
 
+export const options = {
+    tags: {
+        test: "processing",
+    },
+};
+
 const processing = new Rate("processing");
 
 function generateAudioAndValidateResponse(message, model, extraTime) {
@@ -21,7 +27,7 @@ function generateAudioAndValidateResponse(message, model, extraTime) {
     let params = {
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         timeout: `${timeout}s`,
-        tags: { operation: "sync", test: "processing", action: "request" }
+        tags: { operation: "sync", action: "request" }
     };
     let request = http.post(url, JSON.stringify(body), params);
 
@@ -29,7 +35,7 @@ function generateAudioAndValidateResponse(message, model, extraTime) {
         "Response code of post request is 200 (healthy)": (r) => r.status === 200,
         "Status field is 'COMPLETED'": (r) => r.json().status === "COMPLETED",
         "Resource field is a string": (r) => _.isString(r.json().resource),
-    }, { operation: "sync", test: "processing" });
+    }, { operation: "sync" });
     if (failed) {
         return null;
     }
@@ -38,13 +44,16 @@ function generateAudioAndValidateResponse(message, model, extraTime) {
 }
 
 function downloadAudio(url) {
-    let params = { headers: { 'Accept': 'audio/wav' }, responseType: 'binary',
-                   tags: { operation: "sync", test: "processing", action: "download" } };
+    let params = {
+        headers: { 'Accept': 'audio/wav' },
+        responseType: 'binary',
+        tags: { operation: "sync", action: "download" }
+    };
     let request = http.get(url, params);
 
     check(request, {
         "Response code of resource link is 200 (healthy)": (r) => r.status === 200,
-    }, { operation: "sync", test: "processing" });
+    }, { operation: "sync" });
 
     return request.body;
 }
@@ -62,7 +71,7 @@ function testSyncAudio(message, model, expected, extraTime = 0) {
     // console.log(`message: ${message} length: ${audioLength}, expected: ${expected}`);
     let success = check(audioLength, {
         "Length of audio matches": (h) => h === expected,
-    }, {operation: "sync", message: message, model: model, test: "processing"});
+    }, { operation: "sync", message: message, model: model });
     processing.add(success, { operation: "sync", message: message, model: model });
 }
 

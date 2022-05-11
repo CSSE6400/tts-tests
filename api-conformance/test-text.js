@@ -7,6 +7,12 @@ const ENDPOINT = __ENV.ENDPOINT;
 const BASE_URL = ENDPOINT;
 const url = BASE_URL + `/text`;
 
+export const options = {
+    tags: {
+        test: "conformance",
+    },
+};
+
 const conformance = new Rate("conformance");
 
 function validateText() {
@@ -34,14 +40,16 @@ export default function() {
     group("POST /text", () => {
         group("Empty body", () => {
             let body = {};
-            let params = { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                           tags: { endpoint: "/text:POST", test: "conformance" } };
+            let params = {
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                tags: { endpoint: "/text:POST" }
+            };
             let request = http.post(url, JSON.stringify(body), params);
 
             let success = check(request, {
                 "Response code of 400 (bad request)": (r) => r.status === 400
-            }, {endpoint: "/text:POST", test: "conformance"});
-            conformance.add(success, {endpoint: "/text:POST"});
+            }, { endpoint: "/text:POST" });
+            conformance.add(success, { endpoint: "/text:POST" });
         });
 
         group("Invalid body fields", () => {
@@ -50,14 +58,16 @@ export default function() {
                 "voice": "tts_models.en.ljspeech.glow-tts",
                 "operation": "SYNC"
             };
-            let params = { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                           tags: { endpoint: "/text:POST", test: "conformance" } };
+            let params = {
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                tags: { endpoint: "/text:POST" }
+            };
             let request = http.post(url, JSON.stringify(body), params);
 
             let success = check(request, {
                 "Response code of 400 (bad request)": (r) => r.status === 400
-            }, {endpoint: "/text:POST", test: "conformance"});
-            conformance.add(success, {endpoint: "/text:POST"});
+            }, { endpoint: "/text:POST" });
+            conformance.add(success, { endpoint: "/text:POST" });
         });
 
         group("Invalid model", () => {
@@ -66,14 +76,16 @@ export default function() {
                 "model": "en-US_AllisonVoice",
                 "operation": "SYNC",
             };
-            let params = { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                           tags: { endpoint: "/text:POST", test: "conformance" } };
+            let params = {
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                tags: { endpoint: "/text:POST" }
+            };
             let request = http.post(url, JSON.stringify(body), params);
 
             let success = check(request, {
                 "Response code of 400 (bad request)": (r) => r.status === 400
-            }, {endpoint: "/text:POST", test: "conformance"});
-            conformance.add(success, {endpoint: "/text:POST"});
+            }, { endpoint: "/text:POST" });
+            conformance.add(success, { endpoint: "/text:POST" });
         });
 
         group("Invalid operation", () => {
@@ -82,14 +94,16 @@ export default function() {
                 "model": "tts_models.en.ljspeech.glow-tts",
                 "operation": "FAST"
             };
-            let params = { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                           tags: { endpoint: "/text:POST", test: "conformance" } };
+            let params = {
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                tags: { endpoint: "/text:POST" }
+            };
             let request = http.post(url, JSON.stringify(body), params);
 
             let success = check(request, {
                 "Response code of 400 (bad request)": (r) => r.status === 400
-            }, {endpoint: "/text:POST", test: "conformance"});
-            conformance.add(success, {endpoint: "/text:POST"});
+            }, { endpoint: "/text:POST" });
+            conformance.add(success, { endpoint: "/text:POST" });
         });
 
         group("ASYNC operation", () => {
@@ -98,8 +112,10 @@ export default function() {
                 "model": "tts_models.en.ljspeech.glow-tts",
                 "operation": "ASYNC"
             };
-            let params = { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                           tags: { endpoint: "/text:POST", test: "conformance" } };
+            let params = {
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                tags: { endpoint: "/text:POST" }
+            };
             let request = http.post(url, JSON.stringify(body), params);
 
             let bodyValidation = {
@@ -109,8 +125,8 @@ export default function() {
                 "Response body contains operation": (r) => r.json().operation === body.operation,
             }
 
-            let success = check(request, Object.assign(bodyValidation, validateText()), {endpoint: "/text:POST", test: "conformance"});
-            conformance.add(success, {endpoint: "/text:POST"});
+            let success = check(request, Object.assign(bodyValidation, validateText()), { endpoint: "/text:POST" });
+            conformance.add(success, { endpoint: "/text:POST" });
         });
 
         group("SYNC operation", () => {
@@ -119,8 +135,10 @@ export default function() {
                 "model": "tts_models.en.ljspeech.glow-tts",
                 "operation": "SYNC"
             };
-            let params = { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                           tags: { endpoint: "/text:POST", test: "conformance" } };
+            let params = {
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                tags: { endpoint: "/text:POST" }
+            };
             let request = http.post(url, JSON.stringify(body), params);
 
             let bodyValidation = {
@@ -133,8 +151,8 @@ export default function() {
                 "Response body status is not PENDING": (r) => r.json().status !== "PENDING",
             }
 
-            let success = check(request, Object.assign(bodyValidation, validateText()), {endpoint: "/text:POST", test: "conformance"});
-            conformance.add(success, {endpoint: "/text:POST"});
+            let success = check(request, Object.assign(bodyValidation, validateText()), { endpoint: "/text:POST" });
+            conformance.add(success, { endpoint: "/text:POST" });
         });
     });
 
@@ -144,7 +162,7 @@ export default function() {
 
         {
             let url = BASE_URL + `/text?start=${start}&limit=${limit}`;
-            let request = http.get(url, { tags: { endpoint: "/text:GET", test: "conformance" } });
+            let request = http.get(url, { tags: { endpoint: "/text:GET" } });
 
             let responseSuccess = check(request, {
                 "Response code of 200 (healthy)": (r) => r.status === 200,
@@ -152,7 +170,7 @@ export default function() {
                 "Response has size field": (r) => _.has(r.json(), 'size'),
                 "Response has start field": (r) => _.has(r.json(), 'start'),
                 "Response has _links field": (r) => _.has(r.json(), '_links'),
-            }, {endpoint: "/text:GET", test: "conformance"});
+            }, { endpoint: "/text:GET" });
 
             let links = request.json()._links;
             let linksSuccess = check(links, {
@@ -160,7 +178,7 @@ export default function() {
                 "Response has prev link": (r) => _.has(r, 'prev'),
                 "Next link starts with /text?start=": (r) => r.next === null || r.next.startsWith(`${BASE_URL}/text?start=`),
                 "Prev link starts with /text?start=": (r) => r.prev === null || r.prev.startsWith(`${BASE_URL}/text?start=`),
-            }, {endpoint: "/text:GET", test: "conformance"});
+            }, { endpoint: "/text:GET" });
 
 
             let data = request.json().data;
@@ -178,11 +196,11 @@ export default function() {
                 "Every element has a processed_at": (r) => _.every(data, (o) => _.has(o, 'processed_at')),
                 "Every element has a status": (r) => _.every(data, (o) => _.has(o, 'status')),
                 "Every element has a resource": (r) => _.every(data, (o) => _.has(o, 'resource')),
-            }, {endpoint: "/text:GET", test: "conformance"});
+            }, { endpoint: "/text:GET" });
 
-            conformance.add(responseSuccess, {endpoint: "/text:GET"});
-            conformance.add(linksSuccess, {endpoint: "/text:GET"});
-            conformance.add(dataSuccess, {endpoint: "/text:GET"});
+            conformance.add(responseSuccess, { endpoint: "/text:GET" });
+            conformance.add(linksSuccess, { endpoint: "/text:GET" });
+            conformance.add(dataSuccess, { endpoint: "/text:GET" });
         }
     });
 
@@ -190,24 +208,24 @@ export default function() {
         group("Unknown id", () => {
             let id = "123456789012345678901234567890123456789012345678901234567890123";
             let url = BASE_URL + `/text/${id}`;
-            let request = http.get(url, { tags: { endpoint: "/text:GET", test: "conformance" } });
+            let request = http.get(url, { tags: { endpoint: "/text:GET" } });
 
             let success = check(request, {
                 "Response code of 404 (not found)": (r) => r.status === 404
-            }, {endpoint: "/text/{id}:GET", test: "conformance"});
-            conformance.add(success, {endpoint: "/text/{id}:GET"});
+            }, { endpoint: "/text/{id}:GET" });
+            conformance.add(success, { endpoint: "/text/{id}:GET" });
         });
 
         group("Get the first text in list", () => {
             // get ID from /text endpoint
-            let list_request = http.get(BASE_URL + `/text`, { tags: { endpoint: "/text:GET", test: "conformance" } });
+            let list_request = http.get(BASE_URL + `/text`, { tags: { endpoint: "/text:GET" } });
             let id = list_request.json().data[0].id;
 
             let url = BASE_URL + `/text/${id}`;
-            let request = http.get(url, { tags: { endpoint: "/text/{id}:GET", test: "conformance" } });
+            let request = http.get(url, { tags: { endpoint: "/text/{id}:GET" } });
 
-            let success = check(request, validateText(), {endpoint: "/text/{id}:GET", test: "conformance"});
-            conformance.add(success, {endpoint: "/text/{id}:GET"});
+            let success = check(request, validateText(), { endpoint: "/text/{id}:GET" });
+            conformance.add(success, { endpoint: "/text/{id}:GET" });
         });
     });
 
@@ -215,35 +233,35 @@ export default function() {
         group("Unknown id", () => {
             let id = "123456789012345678901234567890123456789012345678901234567890123";
             let url = BASE_URL + `/text/${id}`;
-            let request = http.del(url, { tags: { endpoint: "/text/{id}:DELETE", test: "conformance" } });
+            let request = http.del(url, { tags: { endpoint: "/text/{id}:DELETE" } });
 
             let success = check(request, {
                 "Response code of 404 (not found)": (r) => r.status === 404
-            }, {endpoint: "/text/{id}:DELETE", test: "conformance"});
-            conformance.add(success, {endpoint: "/text/{id}:DELETE"});
+            }, { endpoint: "/text/{id}:DELETE" });
+            conformance.add(success, { endpoint: "/text/{id}:DELETE" });
         });
 
         group("Delete first text in list", () => {
             // get ID from /text endpoint
-            let list_request = http.get(BASE_URL + `/text`, { tags: { endpoint: "/text:GET", test: "conformance" } });
+            let list_request = http.get(BASE_URL + `/text`, { tags: { endpoint: "/text:GET" } });
             let id = list_request.json().data[0].id;
 
             let url = BASE_URL + `/text/${id}`;
-            let request = http.del(url, { tags: { endpoint: "/text/{id}:DELETE", test: "conformance" } });
+            let request = http.del(url, { tags: { endpoint: "/text/{id}:DELETE" } });
 
             let success = check(request, {
                 "Response code of 200 (healthy)": (r) => r.status === 200
-            }, {endpoint: "/text/{id}:DELETE", test: "conformance"});
-            conformance.add(success, {endpoint: "/text/{id}:DELETE"});
+            }, { endpoint: "/text/{id}:DELETE" });
+            conformance.add(success, { endpoint: "/text/{id}:DELETE" });
 
             // check /text endpoint returns 404
             let url2 = BASE_URL + `/text/${id}`;
-            let request2 = http.get(url2, { tags: { endpoint: "/text/{id}:GET", test: "conformance" } });
+            let request2 = http.get(url2, { tags: { endpoint: "/text/{id}:GET" } });
 
             success = check(request2, {
                 "Response code of 404 (not found) after deleting": (r) => r.status === 404
-            }, {endpoint: "/text/{id}:DELETE", test: "conformance"});
-            conformance.add(success, {endpoint: "/text/{id}:DELETE"});
+            }, { endpoint: "/text/{id}:DELETE" });
+            conformance.add(success, { endpoint: "/text/{id}:DELETE" });
         });
     });
 }

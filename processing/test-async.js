@@ -11,6 +11,12 @@ const DEFAULT_TIMEOUT = 20; // seconds
 const WAIT_TIME = 240; // seconds (4 minutes)
 const POLL_INTERVAL = 5; // seconds
 
+export const options = {
+    tags: {
+        test: "processing",
+    },
+};
+
 const processing = new Rate("processing");
 
 function requestAudioGeneration(message, model) {
@@ -23,14 +29,14 @@ function requestAudioGeneration(message, model) {
     let params = {
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         timeout: `${timeout}s`,
-        tags: { operation: "async", test: "processing", action: "request" }
+        tags: { operation: "async", action: "request" }
     };
     let request = http.post(url, JSON.stringify(body), params);
 
     let failed = !check(request, {
         "Response code of post request is 200 (healthy)": (r) => r.status === 200,
         "Response has an id field": (r) => r.json().id,
-    }, { operation: "async", test: "processing" });
+    }, { operation: "async" });
     if (failed) {
         return null;
     }
@@ -39,21 +45,26 @@ function requestAudioGeneration(message, model) {
 }
 
 function downloadAudio(url) {
-    let params = { headers: { 'Accept': 'audio/wav' }, responseType: 'binary',
-                   tags: { operation: "async", test: "processing", action: "download" } };
+    let params = {
+        headers: { 'Accept': 'audio/wav' },
+        responseType: 'binary',
+        tags: { operation: "async", action: "download" }
+    };
     let request = http.get(url, params);
 
     check(request, {
         "Response code of resource link is 200 (healthy)": (r) => r.status === 200,
-    }, { operation: "async", test: "processing" });
+    }, { operation: "async" });
 
     return request.body;
 }
 
 function pollForAudio(requestID) {
     let audioUrl = `${url}/${requestID}`;
-    let params = { headers: { 'Accept': 'application/json' },
-                   tags: { operation: "async", test: "processing", action: "poll" } };
+    let params = {
+        headers: { 'Accept': 'application/json' },
+        tags: { operation: "async", action: "poll" }
+    };
     let request = http.get(audioUrl, params);
 
     let ready = request.json().status === "COMPLETED";
@@ -62,14 +73,14 @@ function pollForAudio(requestID) {
             "Response code of resource link is 200 (healthy)": (r) => r.status === 200,
             "Status field is 'COMPLETED'": (r) => r.json().status === "COMPLETED",
             "Resource field is a string": (r) => _.isString(r.json().resource),
-        }, { operation: "async", test: "processing" });
+        }, { operation: "async" });
         return request.json().resource;
     }
 
     return null;
 }
 
-function testAsyncAudio(message, model, expected, label=null) {
+function testAsyncAudio(message, model, expected, label = null) {
     if (label === null) {
         label = message;
     }
@@ -101,7 +112,7 @@ function testAsyncAudio(message, model, expected, label=null) {
     console.log(`message: ${message} length: ${audioLength}, expected: ${expected}`);
     let success = check(audioLength, {
         "Length of audio matches": (h) => h === expected,
-    }, {operation: "async", message: label, model: model, test: "processing"});
+    }, { operation: "async", message: label, model: model });
     processing.add(success, { operation: "async", message: label, model: model });
 }
 

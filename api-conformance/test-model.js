@@ -6,6 +6,12 @@ import _ from "https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js";
 const ENDPOINT = __ENV.ENDPOINT;
 const BASE_URL = ENDPOINT;
 
+export const options = {
+    tags: {
+        test: "conformance",
+    },
+};
+
 const conformance = new Rate("conformance");
 
 const createEk1TacoTron = () => ({
@@ -45,7 +51,7 @@ export default function() {
     group("/model", () => {
         {
             let url = BASE_URL + `/model`;
-            let request = http.get(url, { tags: { endpoint: "/model", test: "conformance" } });
+            let request = http.get(url, { tags: { endpoint: "/model" } });
 
             let success = check(request, {
                 "Response code of 200 (healthy)": (r) => r.status === 200,
@@ -56,8 +62,8 @@ export default function() {
                 "One element is 'tts_models.en.ljspeech.glow-tts'": (r) => _.includes(r.json(), 'tts_models.en.ljspeech.glow-tts'),
                 "One element is 'tts_models.en.ljspeech.fast_pitch'": (r) => _.includes(r.json(), 'tts_models.en.ljspeech.fast_pitch'),
                 "All elements are unique": (r) => _.uniq(r.json()).length === r.json().length,
-            }, {endpoint: "/model", test: "conformance"});
-            conformance.add(success, {endpoint: "/model"});
+            }, { endpoint: "/model" });
+            conformance.add(success, { endpoint: "/model" });
         }
     });
 
@@ -66,7 +72,7 @@ export default function() {
             let id = 'tts_models.en.ek1.tacotron2';
 
             let url = BASE_URL + `/model/${id}`;
-            let request = http.get(url, { tags: { endpoint: "/model/{id}", test: "conformance" } });
+            let request = http.get(url, { tags: { endpoint: "/model/{id}" } });
 
             let expected = createEk1TacoTron();
 
@@ -74,15 +80,15 @@ export default function() {
                 "Response code of 200 (healthy)": (r) => r.status === 200,
                 "Response is an object": (r) => _.isObject(r.json()),
                 "Correct response": (r) => _.isEqual(r.json(), expected)
-            }, {endpoint: "/model/{id}", test: "conformance"});
-            conformance.add(success, {endpoint: "/model/{id}"});
+            }, { endpoint: "/model/{id}" });
+            conformance.add(success, { endpoint: "/model/{id}" });
         });
 
         group("test tts_models.en.ljspeech.tacotron2-DDC response", () => {
             let id = 'tts_models.en.ljspeech.tacotron2-DDC';
 
             let url = BASE_URL + `/model/${id}`;
-            let request = http.get(url, { tags: { endpoint: "/model/{id}", test: "conformance" } });
+            let request = http.get(url, { tags: { endpoint: "/model/{id}" } });
 
             let expected = createLJTacoTron();
 
@@ -90,15 +96,15 @@ export default function() {
                 "Response code of 200 (healthy)": (r) => r.status === 200,
                 "Response is an object": (r) => _.isObject(r.json()),
                 "Correct response": (r) => _.isEqual(r.json(), expected)
-            }, {endpoint: "/model/{id}", test: "conformance"});
-            conformance.add(success, {endpoint: "/model/{id}"});
+            }, { endpoint: "/model/{id}" });
+            conformance.add(success, { endpoint: "/model/{id}" });
         });
 
         group("test tts_models.en.ljspeech.glow-tts response", () => {
             let id = 'tts_models.en.ljspeech.glow-tts';
 
             let url = BASE_URL + `/model/${id}`;
-            let request = http.get(url, { tags: { endpoint: "/model/{id}", test: "conformance" } });
+            let request = http.get(url, { tags: { endpoint: "/model/{id}" } });
 
             let expected = createLJGlowTts();
 
@@ -106,15 +112,15 @@ export default function() {
                 "Response code of 200 (healthy)": (r) => r.status === 200,
                 "Response is an object": (r) => _.isObject(r.json()),
                 "Correct response": (r) => _.isEqual(r.json(), expected)
-            }, {endpoint: "/model/{id}", test: "conformance"});
-            conformance.add(success, {endpoint: "/model/{id}"});
+            }, { endpoint: "/model/{id}" });
+            conformance.add(success, { endpoint: "/model/{id}" });
         });
 
         group("test tts_models.en.ljspeech.fast_pitch response", () => {
             let id = 'tts_models.en.ljspeech.fast_pitch';
 
             let url = BASE_URL + `/model/${id}`;
-            let request = http.get(url, { tags: { endpoint: "/model/{id}", test: "conformance" } });
+            let request = http.get(url, { tags: { endpoint: "/model/{id}" } });
 
             let expected = createLJFastPitch();
 
@@ -122,20 +128,20 @@ export default function() {
                 "Response code of 200 (healthy)": (r) => r.status === 200,
                 "Response is an object": (r) => _.isObject(r.json()),
                 "Correct response": (r) => _.isEqual(r.json(), expected)
-            }, {endpoint: "/model/{id}", test: "conformance"});
-            conformance.add(success, {endpoint: "/model/{id}"});
+            }, { endpoint: "/model/{id}" });
+            conformance.add(success, { endpoint: "/model/{id}" });
         });
 
         group("test unknown model response", () => {
             let id = 'tts_models.en.unknown';
 
             let url = BASE_URL + `/model/${id}`;
-            let request = http.get(url, { tags: { endpoint: "/model/{id}", test: "conformance" } });
+            let request = http.get(url, { tags: { endpoint: "/model/{id}" } });
 
             let success = check(request, {
                 "Response code of 404 (not found)": (r) => r.status === 404
-            }, {endpoint: "/model/{id}", test: "conformance"});
-            conformance.add(success, {endpoint: "/model/{id}"});
+            }, { endpoint: "/model/{id}" });
+            conformance.add(success, { endpoint: "/model/{id}" });
         });
     });
 
