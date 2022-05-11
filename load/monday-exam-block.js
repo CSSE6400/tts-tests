@@ -11,6 +11,7 @@ const BASE_URL = ENDPOINT;
 
 const queries = new Rate("queries");
 const mutations = new Rate("mutations");
+const errors = new Rate("errors");
 
 export const options = {
     rps: 50,
@@ -44,8 +45,15 @@ export function studyingStudent() {
     let url = BASE_URL + `/text`;
     let request = http.get(url, { tags: { endpoint: "/text" } });
 
-    let data = request.json().data;
-    let success = check(request, checkTextList, { endpoint: "/text" });
+    let data;
+    let success;
+    try {
+        data = request.json().data;
+        success = check(request, checkTextList, { endpoint: "/text" });
+    } catch (e) {
+        console.log(e);
+        errors.add(1, { endpoint: "/text" });
+    }
     queries.add(success, { endpoint: "/text" });
 
     // I've got to find my courses text data in this list!
@@ -56,16 +64,26 @@ export function studyingStudent() {
     url = BASE_URL + `/text/${data[0].id}`;
     request = http.get(url, { tags: { endpoint: "/text/{id}" } });
 
-    success = check(request, checkText, { endpoint: "/text/{id}" });
+    try {
+        success = check(request, checkText, { endpoint: "/text/{id}" });
+    } catch (e) {
+        console.log(e);
+        errors.add(1, { endpoint: "/text/{id}" });
+    }
     queries.add(success, { endpoint: "/text/{id}" });
 
-    // Now I need to download the audio
-    url = request.json().resource;
-    request = http.get(url, { tags: { endpoint: "download" } });
+    try {
+        // Now I need to download the audio
+        url = request.json().resource;
+        request = http.get(url, { tags: { endpoint: "download" } });
 
-    success = check(request, {
-        "Status is 200": (r) => r.status === 200,
-    }, { endpoint: "download" });
+        success = check(request, {
+            "Status is 200": (r) => r.status === 200,
+        }, { endpoint: "download" });
+    } catch (e) {
+        console.log(e);
+        errors.add(1, { endpoint: "download" });
+    }
     queries.add(success, { endpoint: "download" });
 
     // Alright I'll listen to this chapter for two minutes
@@ -88,5 +106,5 @@ export function uploadingTeacher() {
     mutations.add(success, { endpoint: "/text", operation: "ASYNC", label: "Upload Revision Material" });
 
     // Excellent, I've uploaded my stuff, home time!
-    sleep(100);
+    sleep(30);
 }

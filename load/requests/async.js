@@ -11,6 +11,8 @@ const DEFAULT_TIMEOUT = 20; // seconds
 const WAIT_TIME = 240; // seconds (4 minutes)
 const POLL_INTERVAL = 5; // seconds
 
+const errors = new Rate("errors");
+
 function requestAudioGeneration(message, model) {
     let body = {
         "message": message,
@@ -25,15 +27,21 @@ function requestAudioGeneration(message, model) {
     };
     let request = http.post(url, JSON.stringify(body), params);
 
-    let failed = !check(request, {
-        "Response code of post request is 200 (healthy)": (r) => r.status === 200,
-        "Response has an id field": (r) => r.json().id,
-    }, { operation: "async" });
-    if (failed) {
-        return null;
-    }
+    let failed;
+    try {
+        failed = !check(request, {
+            "Response code of post request is 200 (healthy)": (r) => r.status === 200,
+            "Response has an id field": (r) => r.json().id,
+        }, { operation: "async" });
+        if (failed) {
+            return null;
+        }
 
-    return request.json().id;
+        return request.json().id;
+    } catch (e) {
+        errors.add(1, { operation: "async", message: message, model: model });
+        throw e;
+    }
 }
 
 function downloadAudio(url) {
@@ -59,14 +67,19 @@ function pollForAudio(requestID) {
     };
     let request = http.get(audioUrl, params);
 
-    let ready = request.json().status === "COMPLETED";
-    if (ready) {
-        check(request, {
-            "Response code of resource link is 200 (healthy)": (r) => r.status === 200,
-            "Status field is 'COMPLETED'": (r) => r.json().status === "COMPLETED",
-            "Resource field is a string": (r) => _.isString(r.json().resource),
-        }, { operation: "async" });
-        return request.json().resource;
+    try {
+        let ready = request.json().status === "COMPLETED";
+        if (ready) {
+            check(request, {
+                "Response code of resource link is 200 (healthy)": (r) => r.status === 200,
+                "Status field is 'COMPLETED'": (r) => r.json().status === "COMPLETED",
+                "Resource field is a string": (r) => _.isString(r.json().resource),
+            }, { operation: "async" });
+            return request.json().resource;
+        }
+    } catch (e) {
+        errors.add(1, { operation: "async", message: message, model: model });
+        throw e;
     }
 
     return null;

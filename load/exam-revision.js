@@ -9,6 +9,7 @@ const BASE_URL = ENDPOINT;
 
 const queries = new Rate("queries");
 const mutations = new Rate("mutations");
+const errors = new Rate("errors");
 
 export const options = {
     rps: 50,
@@ -44,7 +45,13 @@ export function examScenario() {
     let request = http.get(url, { tags: { endpoint: "/text" } });
 
     let data = request.json().data;
-    let success = check(request, checkTextList, { endpoint: "/text" });
+    let success;
+    try {
+        success = check(request, checkTextList, { endpoint: "/text" });
+    } catch (e) {
+        console.log(e);
+        errors.add(1, { endpoint: "/text" });
+    }
     queries.add(success, { endpoint: "/text" });
 
     // I've got to find my courses text data in this list!
@@ -55,7 +62,12 @@ export function examScenario() {
     url = BASE_URL + `/text/${data[0].id}`;
     request = http.get(url, { tags: { endpoint: "/text/{id}" } });
 
-    success = check(request, checkText, { endpoint: "/text/{id}" });
+    try {
+        success = check(request, checkText, { endpoint: "/text/{id}" });
+    } catch (e) {
+        console.log(e);
+        errors.add(1, { endpoint: "/text/{id}" });
+    }
     queries.add(success, { endpoint: "/text/{id}" });
 
     // Now I need to download the audio

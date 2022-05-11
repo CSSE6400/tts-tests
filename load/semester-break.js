@@ -10,6 +10,7 @@ const BASE_URL = ENDPOINT;
 
 const queries = new Rate("queries");
 const mutations = new Rate("mutations");
+const errors = new Rate("errors");
 
 export const options = {
     rps: 50,
@@ -48,7 +49,13 @@ export function modelScenario() {
     let url = BASE_URL + `/model`;
     let request = http.get(url, { tags: { endpoint: "/model" } });
 
-    let success = check(request, checkModelList, { endpoint: "/model" });
+    let success;
+    try {
+        success = check(request, checkModelList, { endpoint: "/model" });
+    } catch (e) {
+        console.log(e);
+        errors.add(1, { endpoint: "/model" });
+    }
     queries.add(success, { endpoint: "/model" });
 
     sleep(5);
@@ -56,7 +63,12 @@ export function modelScenario() {
     url = BASE_URL + `/model/tts_models.en.ljspeech.glow-tts`;
     request = http.get(url, { tags: { endpoint: "/model/{id}" } });
 
-    success = check(request, checkModel, { endpoint: "/model/{id}" });
+    try {
+        success = check(request, checkModel, { endpoint: "/model/{id}" });
+    } catch (e) {
+        console.log(e);
+        errors.add(1, { endpoint: "/model/{id}" });
+    }
     queries.add(success, { endpoint: "/model/{id}" });
 
     sleep(5);
@@ -66,8 +78,15 @@ export function textScenario() {
     let url = BASE_URL + `/text`;
     let request = http.get(url, { tags: { endpoint: "/text" } });
 
-    let data = request.json().data;
-    let success = check(request, checkTextList, { endpoint: "/text" });
+    let data;
+    let success;
+    try {
+        data = request.json().data;
+        success = check(request, checkTextList, { endpoint: "/text" });
+    } catch (e) {
+        console.log(e);
+        errors.add(1, { endpoint: "/text" });
+    }
     queries.add(success, { endpoint: "/text" });
 
     sleep(20);
@@ -75,7 +94,12 @@ export function textScenario() {
     url = BASE_URL + `/text/${data[0].id}`;
     request = http.get(url, { tags: { endpoint: "/text/{id}" } });
 
-    success = check(request, checkText, { endpoint: "/text/{id}" });
+    try {
+        success = check(request, checkText, { endpoint: "/text/{id}" });
+    } catch (e) {
+        console.log(e);
+        errors.add(1, { endpoint: "/text/{id}" });
+    }
     queries.add(success, { endpoint: "/text/{id}" });
 
     sleep(20);

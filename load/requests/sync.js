@@ -8,6 +8,8 @@ const url = BASE_URL + `/text`;
 
 const DEFAULT_TIMEOUT = 120;
 
+const errors = new Rate("errors");
+
 function generateAudioAndValidateResponse(message, model, extraTime) {
     let body = {
         "message": message,
@@ -22,16 +24,22 @@ function generateAudioAndValidateResponse(message, model, extraTime) {
     };
     let request = http.post(url, JSON.stringify(body), params);
 
-    let failed = !check(request, {
-        "Response code of post request is 200 (healthy)": (r) => r.status === 200,
-        "Status field is 'COMPLETED'": (r) => r.json().status === "COMPLETED",
-        "Resource field is a string": (r) => _.isString(r.json().resource),
-    }, { operation: "sync" });
-    if (failed) {
-        return null;
-    }
+    let failed;
+    try {
+        failed = !check(request, {
+            "Response code of post request is 200 (healthy)": (r) => r.status === 200,
+            "Status field is 'COMPLETED'": (r) => r.json().status === "COMPLETED",
+            "Resource field is a string": (r) => _.isString(r.json().resource),
+        }, { operation: "sync" });
+        if (failed) {
+            return null;
+        }
 
-    return request.json().resource;
+        return request.json().resource;
+    } catch (e) {
+        errors.add(1, { operation: "sync", message: message, model: model });
+        throw e;
+    }
 }
 
 function downloadAudio(url) {
