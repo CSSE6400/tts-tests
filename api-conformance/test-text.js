@@ -23,8 +23,6 @@ function validateText() {
         "Response body id is a string": (r) => _.isString(r.json().id),
         "Response body status is a string": (r) => _.isString(r.json().status),
         "Response body created_at is a string": (r) => _.isString(r.json().created_at),
-        // check created at day is today
-        "Response body created_at is today": (r) => r.json().created_at.includes(new Date().toISOString().substring(0, 10)),
         // check status is either "PENDING", "COMPLETED", or "FAILED"
         "Response body status is PENDING, COMPLETED, or FAILED": (r) => r.json().status === "PENDING" || r.json().status === "COMPLETED" || r.json().status === "FAILED",
         // check if status is "COMPLETED" then resource is a string
