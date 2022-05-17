@@ -43,7 +43,7 @@ export const options = {
 
 export function studyingStudent() {
     let url = BASE_URL + `/text`;
-    let request = http.get(url, { tags: { endpoint: "/text" } });
+    let request = http.get(url, { tags: { endpoint: "/text" }, responseType: "text" });
 
     let data;
     let success;
@@ -62,7 +62,7 @@ export function studyingStudent() {
     // Ah found it! Of course it was the first thing I saw :(
 
     url = BASE_URL + `/text/${data[0].id}`;
-    request = http.get(url, { tags: { endpoint: "/text/{id}" } });
+    request = http.get(url, { tags: { endpoint: "/text/{id}" }, responseType: "text" });
 
     try {
         success = check(request, checkText, { endpoint: "/text/{id}" });

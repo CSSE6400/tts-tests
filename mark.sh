@@ -21,19 +21,31 @@ if [ "$response" != "200" ]
     exit 1;
 fi
 
+function runK6 {
+  name=$(basename "$1" .js)
+  # enable discard body for ./load/exam-revision.js and ./load/monday-exam-block.js tests
+  discard_flag=""
+  if [ "$name" = "exam-revision" ] || [ "$name" = "monday-exam-block" ]; then
+      discard_flag="--discard-response-bodies"
+  fi
+  k6 run ${discard_flag} \
+    --out influxdb=http://localhost:8086/k6 \
+    --out json=log-$name.json \
+    --out csv=log-$name.csv $1 2>&1 | tee -a log-$name.txt
+}
+
 # if there is a third parameter
 if [ $# -eq 3 ]
   then
-    name=$(basename "$3" .js)
-    k6 run --out influxdb=http://localhost:8086/k6 --out json=log-$name.json --out csv=log-$name.csv $3 2>&1 | tee -a log-$name.txt
+    runK6 $3
   else
-    k6 run --out influxdb=http://localhost:8086/k6 --out json=log.json --out csv=log.csv ./api-conformance.js 2>&1 | tee -a log.txt
-    k6 run --out influxdb=http://localhost:8086/k6 --out json=log.json --out csv=log.csv ./processing.js 2>&1 | tee -a log.txt
-    k6 run --out influxdb=http://localhost:8086/k6 --out json=log.json --out csv=log.csv ./load/semester-break.js 2>&1 | tee -a log.txt
-    k6 run --out influxdb=http://localhost:8086/k6 --out json=log.json --out csv=log.csv ./load/exam-revision.js 2>&1 | tee -a log.txt
-    k6 run --out influxdb=http://localhost:8086/k6 --out json=log.json --out csv=log.csv ./load/monday-exam-block.js 2>&1 | tee -a log.txt
-    k6 run --out influxdb=http://localhost:8086/k6 --out json=log.json --out csv=log.csv ./load/teaching-cancelled.js 2>&1 | tee -a log.txt
-    k6 run --out influxdb=http://localhost:8086/k6 --out json=log.json --out csv=log.csv ./load/reading-list.js 2>&1 | tee -a log.txt
-    k6 run --out influxdb=http://localhost:8086/k6 --out json=log.json --out csv=log.csv ./load/monday-in-semester.js 2>&1 | tee -a log.txt
+    runK6 ./api-conformance.js
+    runK6 ./processing.js
+    runK6 ./load/semester-break.js
+    runK6 ./load/exam-revision.js
+    runK6 ./load/monday-exam-block.js
+    runK6 ./load/teaching-cancelled.js
+    runK6 ./load/reading-list.js
+    runK6 ./load/monday-in-semester.js
 fi
 

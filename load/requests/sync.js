@@ -1,4 +1,5 @@
 import http from "k6/http";
+import { Rate } from "k6/metrics";
 import { group, check } from "k6";
 import _ from "https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js";
 
