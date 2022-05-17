@@ -2,7 +2,7 @@
 
 if [ $# -eq 0 ]
   then
-    echo "usage: ./run.sh [endpoint]";
+    echo "usage: ./run.sh [endpoint] [-l] [test]";
     exit 1;
 fi
 
@@ -21,13 +21,18 @@ if [ "$response" != "200" ]
     exit 1;
 fi
 
-
-k6 run ./api-conformance.js
-k6 run ./processing.js
-k6 run ./load/semester-break.js
-k6 run ./load/exam-revision.js
-k6 run ./load/monday-exam-block.js
-k6 run ./load/teaching-cancelled.js
-k6 run ./load/reading-list.js
-k6 run ./load/monday-in-semester.js
+# if there is a third parameter
+if [ $# -eq 3 ]
+  then
+    k6 run $3
+  else
+    k6 run ./api-conformance.js
+    k6 run ./processing.js
+    k6 run ./load/semester-break.js
+    k6 run ./load/exam-revision.js
+    k6 run ./load/monday-exam-block.js
+    k6 run ./load/teaching-cancelled.js
+    k6 run ./load/reading-list.js
+    k6 run ./load/monday-in-semester.js
+fi
 
