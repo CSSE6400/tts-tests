@@ -30,7 +30,7 @@ if [ $# -eq 3 ]
     k6 run ./processing.js
     k6 run ./load/semester-break.js
     k6 run ./load/exam-revision.js
-    k6 run ./load/monday-exam-block.js
+    # k6 run ./load/monday-exam-block.js
     k6 run ./load/teaching-cancelled.js
     k6 run ./load/reading-list.js
     k6 run ./load/monday-in-semester.js
