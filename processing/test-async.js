@@ -122,111 +122,123 @@ const MESSAGES = {
 // load a very large message from a file
 const LARGE = open("gulliver-trimmed.txt");
 
+function dontCrash(fn) {
+    return (...args) => {
+        try {
+            return fn(...args);
+        }
+        catch (e) {
+            console.log(e);
+            return null;
+        }
+    }
+}
+
 export default function() {
     group("Test async small", () => {
-        group("Generate 'Hello CSSE6400'", () => {
+        group("Generate 'Hello CSSE6400'", dontCrash(() => {
             testAsyncAudio(
                 "Hello CSSE6400",
                 "tts_models.en.ljspeech.glow-tts",
                 83532
             );
-        });
+        }));
 
-        group("Generate 'Roads? Where we're going, we don't need roads!'", () => {
+        group("Generate 'Roads? Where we're going, we don't need roads!'", dontCrash(() => {
             testAsyncAudio(
                 "Roads? Where we're going, we don't need roads!",
                 "tts_models.en.ljspeech.fast_pitch",
                 137292
             );
-        });
+        }));
 
-        group("Generate 'To thine own self be true'", () => {
+        group("Generate 'To thine own self be true'", dontCrash(() => {
             testAsyncAudio(
                 "To thine own self be true",
                 "tts_models.en.ljspeech.fast_pitch",
                 100940
             );
-        });
+        }));
 
-        group("Generate 'Toto, I've a feeling we're not in Kansas anymore'", () => {
+        group("Generate 'Toto, I've a feeling we're not in Kansas anymore'", dontCrash(() => {
             testAsyncAudio(
                 "Toto, I've a feeling we're not in Kansas anymore",
                 "tts_models.en.ljspeech.glow-tts",
                 170572
             );
-        });
+        }));
 
-        group("Generate 'I'm going to make him an offer he can't refuse'", () => {
+        group("Generate 'I'm going to make him an offer he can't refuse'", dontCrash(() => {
             testAsyncAudio(
                 "I'm going to make him an offer he can't refuse",
                 "tts_models.en.ljspeech.fast_pitch",
                 149580
             );
-        });
+        }));
     });
 
     group("Test async large", () => {
-        group("Generate A Tale of Two Cities", () => {
+        group("Generate A Tale of Two Cities", dontCrash(() => {
             testAsyncAudio(
                 MESSAGES["Dickens"],
                 "tts_models.en.ljspeech.glow-tts",
                 1795660,
                 "A Tale of Two Cities"
             );
-        });
+        }));
 
-        group("Generate Pride and Prejudice", () => {
+        group("Generate Pride and Prejudice", dontCrash(() => {
             testAsyncAudio(
                 MESSAGES["Austen"],
                 "tts_models.en.ljspeech.fast_pitch",
                 941676,
                 "Pride and Prejudice"
             )
-        });
+        }));
 
-        group("Generate Haunting of Hill House", () => {
+        group("Generate Haunting of Hill House", dontCrash(() => {
             testAsyncAudio(
                 MESSAGES["HillHouse"],
                 "tts_models.en.ljspeech.glow-tts",
                 1591948,
                 "Haunting of Hill House"
             )
-        });
+        }));
 
-        group("Generate Hamlet", () => {
+        group("Generate Hamlet", dontCrash(() => {
             testAsyncAudio(
                 MESSAGES["Shakespeare"],
                 "tts_models.en.ljspeech.fast_pitch",
                 1525388,
                 "Hamlet"
             )
-        });
+        }));
 
-        group("Generate The Body", () => {
+        group("Generate The Body", dontCrash(() => {
             testAsyncAudio(
                 MESSAGES["King"],
                 "tts_models.en.ljspeech.glow-tts",
                 2141420,
                 "The Body"
             )
-        });
+        }));
 
-        group("Generate The Great Gatsby", () => {
+        group("Generate The Great Gatsby", dontCrash(() => {
             testAsyncAudio(
                 MESSAGES["Fitzgerald"],
                 "tts_models.en.ljspeech.fast_pitch",
                 1151628,
                 "The Great Gatsby"
             )
-        });
+        }));
     });
 
-    group("Test async extra large", () => {
+    group("Test async extra large", dontCrash(() => {
         testAsyncAudio(
             LARGE,
             "tts_models.en.ljspeech.glow-tts",
             26393004,
             "Gullivers Travels"
         );
-    });
+    }));
 }

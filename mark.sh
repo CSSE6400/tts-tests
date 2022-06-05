@@ -43,7 +43,7 @@ if [ $# -eq 3 ]
     runK6 ./processing.js
     runK6 ./load/semester-break.js
     runK6 ./load/exam-revision.js
-    runK6 ./load/monday-exam-block.js
+    # runK6 ./load/monday-exam-block.js
     runK6 ./load/teaching-cancelled.js
     runK6 ./load/reading-list.js
     runK6 ./load/monday-in-semester.js

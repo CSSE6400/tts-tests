@@ -1,5 +1,5 @@
 import http from "k6/http";
-import { group, check } from "k6";
+import { group, check, fail } from "k6";
 import { Rate } from "k6/metrics";
 import _ from "https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js";
 
@@ -8,6 +8,18 @@ const BASE_URL = ENDPOINT;
 const url = BASE_URL + `/text`;
 
 const conformance = new Rate("conformance");
+
+function dontCrash(fn) {
+    return (...args) => {
+        try {
+            return fn(...args);
+        }
+        catch (e) {
+            console.log(e);
+            return null;
+        }
+    }
+}
 
 function validateText() {
     return {
@@ -32,7 +44,7 @@ function validateText() {
 
 export default function() {
     group("POST /text", () => {
-        group("Empty body", () => {
+        group("Empty body", dontCrash(() => {
             let body = {};
             let params = {
                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -44,9 +56,9 @@ export default function() {
                 "Response code of 400 (bad request)": (r) => r.status === 400
             }, { endpoint: "/text:POST" });
             conformance.add(success, { endpoint: "/text:POST" });
-        });
+        }));
 
-        group("Invalid body fields", () => {
+        group("Invalid body fields", dontCrash(() => {
             let body = {
                 "text": "Hello, world!",
                 "voice": "tts_models.en.ljspeech.glow-tts",
@@ -62,9 +74,9 @@ export default function() {
                 "Response code of 400 (bad request)": (r) => r.status === 400
             }, { endpoint: "/text:POST" });
             conformance.add(success, { endpoint: "/text:POST" });
-        });
+        }));
 
-        group("Invalid model", () => {
+        group("Invalid model", dontCrash(() => {
             let body = {
                 "message": "Hello, world!",
                 "model": "en-US_AllisonVoice",
@@ -80,9 +92,9 @@ export default function() {
                 "Response code of 400 (bad request)": (r) => r.status === 400
             }, { endpoint: "/text:POST" });
             conformance.add(success, { endpoint: "/text:POST" });
-        });
+        }));
 
-        group("Invalid operation", () => {
+        group("Invalid operation", dontCrash(() => {
             let body = {
                 "message": "Hello, world!",
                 "model": "tts_models.en.ljspeech.glow-tts",
@@ -98,9 +110,9 @@ export default function() {
                 "Response code of 400 (bad request)": (r) => r.status === 400
             }, { endpoint: "/text:POST" });
             conformance.add(success, { endpoint: "/text:POST" });
-        });
+        }));
 
-        group("ASYNC operation", () => {
+        group("ASYNC operation", dontCrash(() => {
             let body = {
                 "message": "Hello, world!",
                 "model": "tts_models.en.ljspeech.glow-tts",
@@ -121,9 +133,9 @@ export default function() {
 
             let success = check(request, Object.assign(bodyValidation, validateText()), { endpoint: "/text:POST" });
             conformance.add(success, { endpoint: "/text:POST" });
-        });
+        }));
 
-        group("SYNC operation", () => {
+        group("SYNC operation", dontCrash(() => {
             let body = {
                 "message": "Hello, world!",
                 "model": "tts_models.en.ljspeech.glow-tts",
@@ -147,10 +159,10 @@ export default function() {
 
             let success = check(request, Object.assign(bodyValidation, validateText()), { endpoint: "/text:POST" });
             conformance.add(success, { endpoint: "/text:POST" });
-        });
+        }));
     });
 
-    group("GET /text", () => {
+    group("GET /text", dontCrash(() => {
         let start = '0';
         let limit = '10';
 
@@ -196,10 +208,10 @@ export default function() {
             conformance.add(linksSuccess, { endpoint: "/text:GET" });
             conformance.add(dataSuccess, { endpoint: "/text:GET" });
         }
-    });
+    }));
 
     group("GET /text/{id}", () => {
-        group("Unknown id", () => {
+        group("Unknown id", dontCrash(() => {
             let id = "123456789012345678901234567890123456789012345678901234567890123";
             let url = BASE_URL + `/text/${id}`;
             let request = http.get(url, { tags: { endpoint: "/text:GET" } });
@@ -208,9 +220,9 @@ export default function() {
                 "Response code of 404 (not found)": (r) => r.status === 404
             }, { endpoint: "/text/{id}:GET" });
             conformance.add(success, { endpoint: "/text/{id}:GET" });
-        });
+        }));
 
-        group("Get the first text in list", () => {
+        group("Get the first text in list", dontCrash(() => {
             // get ID from /text endpoint
             let list_request = http.get(BASE_URL + `/text`, { tags: { endpoint: "/text:GET" } });
             let id = list_request.json().data[0].id;
@@ -220,11 +232,11 @@ export default function() {
 
             let success = check(request, validateText(), { endpoint: "/text/{id}:GET" });
             conformance.add(success, { endpoint: "/text/{id}:GET" });
-        });
+        }));
     });
 
     group("DELETE /text/{id}", () => {
-        group("Unknown id", () => {
+        group("Unknown id", dontCrash(() => {
             let id = "123456789012345678901234567890123456789012345678901234567890123";
             let url = BASE_URL + `/text/${id}`;
             let request = http.del(url, { tags: { endpoint: "/text/{id}:DELETE" } });
@@ -233,9 +245,9 @@ export default function() {
                 "Response code of 404 (not found)": (r) => r.status === 404
             }, { endpoint: "/text/{id}:DELETE" });
             conformance.add(success, { endpoint: "/text/{id}:DELETE" });
-        });
+        }));
 
-        group("Delete first text in list", () => {
+        group("Delete first text in list", dontCrash(() => {
             // get ID from /text endpoint
             let list_request = http.get(BASE_URL + `/text`, { tags: { endpoint: "/text:GET" } });
             let id = list_request.json().data[0].id;
@@ -256,6 +268,6 @@ export default function() {
                 "Response code of 404 (not found) after deleting": (r) => r.status === 404
             }, { endpoint: "/text/{id}:DELETE" });
             conformance.add(success, { endpoint: "/text/{id}:DELETE" });
-        });
+        }));
     });
 }

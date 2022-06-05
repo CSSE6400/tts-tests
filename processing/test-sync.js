@@ -1,5 +1,5 @@
 import http from "k6/http";
-import { group, check } from "k6";
+import { group, check, fail } from "k6";
 import { Rate } from "k6/metrics";
 import _ from "https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js";
 
@@ -69,46 +69,58 @@ function testSyncAudio(message, model, expected, extraTime = 0) {
     processing.add(success, { operation: "sync", message: message, model: model });
 }
 
+function dontCrash(fn) {
+    return (...args) => {
+        try {
+            return fn(...args);
+        }
+        catch (e) {
+            console.log(e);
+            return null;
+        }
+    }
+}
+
 export default function() {
     group("Test sync", () => {
-        group("Generate 'Hello CSSE6400'", () => {
+        group("Generate 'Hello CSSE6400'", dontCrash(() => {
             testSyncAudio(
                 "Hello CSSE6400",
                 "tts_models.en.ljspeech.glow-tts",
                 83532
             );
-        });
+        }));
 
-        group("Generate 'Roads? Where we're going, we don't need roads!'", () => {
+        group("Generate 'Roads? Where we're going, we don't need roads!'", dontCrash(() => {
             testSyncAudio(
                 "Roads? Where we're going, we don't need roads!",
                 "tts_models.en.ljspeech.fast_pitch",
                 137292
             );
-        });
+        }));
 
-        group("Generate 'To thine own self be true'", () => {
+        group("Generate 'To thine own self be true'", dontCrash(() => {
             testSyncAudio(
                 "To thine own self be true",
                 "tts_models.en.ljspeech.fast_pitch",
                 100940
             );
-        });
+        }));
 
-        group("Generate 'Toto, I've a feeling we're not in Kansas anymore'", () => {
+        group("Generate 'Toto, I've a feeling we're not in Kansas anymore'", dontCrash(() => {
             testSyncAudio(
                 "Toto, I've a feeling we're not in Kansas anymore",
                 "tts_models.en.ljspeech.glow-tts",
                 170572
             );
-        });
+        }));
 
-        group("Generate 'I'm going to make him an offer he can't refuse'", () => {
+        group("Generate 'I'm going to make him an offer he can't refuse'", dontCrash(() => {
             testSyncAudio(
                 "I'm going to make him an offer he can't refuse",
                 "tts_models.en.ljspeech.fast_pitch",
                 149580
             );
-        });
+        }));
     });
 }

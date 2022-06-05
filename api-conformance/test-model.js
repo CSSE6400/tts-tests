@@ -1,5 +1,5 @@
 import http from "k6/http";
-import { group, check } from "k6";
+import { group, check, fail } from "k6";
 import { Rate } from "k6/metrics";
 import _ from "https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js";
 
@@ -40,9 +40,21 @@ const createLJFastPitch = () => ({
     url: 'https://coqui.gateway.scarf.sh/v0.2.2/tts_models--en--ljspeech--fast_pitch.zip',
 });
 
+function dontCrash(fn) {
+    return (...args) => {
+        try {
+            return fn(...args);
+        }
+        catch (e) {
+            console.log(e);
+            return null;
+        }
+    }
+}
+
 export default function() {
 
-    group("/model", () => {
+    group("/model", dontCrash(() => {
         {
             let url = BASE_URL + `/model`;
             let request = http.get(url, { tags: { endpoint: "/model" } });
@@ -59,10 +71,10 @@ export default function() {
             }, { endpoint: "/model" });
             conformance.add(success, { endpoint: "/model" });
         }
-    });
+    }));
 
     group("/model/{id}", () => {
-        group("test tts_models.en.ek1.tacotron2 response", () => {
+        group("test tts_models.en.ek1.tacotron2 response", dontCrash(() => {
             let id = 'tts_models.en.ek1.tacotron2';
 
             let url = BASE_URL + `/model/${id}`;
@@ -76,9 +88,9 @@ export default function() {
                 "Correct response": (r) => _.isEqual(r.json(), expected)
             }, { endpoint: "/model/{id}" });
             conformance.add(success, { endpoint: "/model/{id}" });
-        });
+        }));
 
-        group("test tts_models.en.ljspeech.tacotron2-DDC response", () => {
+        group("test tts_models.en.ljspeech.tacotron2-DDC response", dontCrash(() => {
             let id = 'tts_models.en.ljspeech.tacotron2-DDC';
 
             let url = BASE_URL + `/model/${id}`;
@@ -92,9 +104,9 @@ export default function() {
                 "Correct response": (r) => _.isEqual(r.json(), expected)
             }, { endpoint: "/model/{id}" });
             conformance.add(success, { endpoint: "/model/{id}" });
-        });
+        }));
 
-        group("test tts_models.en.ljspeech.glow-tts response", () => {
+        group("test tts_models.en.ljspeech.glow-tts response", dontCrash(() => {
             let id = 'tts_models.en.ljspeech.glow-tts';
 
             let url = BASE_URL + `/model/${id}`;
@@ -108,9 +120,9 @@ export default function() {
                 "Correct response": (r) => _.isEqual(r.json(), expected)
             }, { endpoint: "/model/{id}" });
             conformance.add(success, { endpoint: "/model/{id}" });
-        });
+        }));
 
-        group("test tts_models.en.ljspeech.fast_pitch response", () => {
+        group("test tts_models.en.ljspeech.fast_pitch response", dontCrash(() => {
             let id = 'tts_models.en.ljspeech.fast_pitch';
 
             let url = BASE_URL + `/model/${id}`;
@@ -124,9 +136,9 @@ export default function() {
                 "Correct response": (r) => _.isEqual(r.json(), expected)
             }, { endpoint: "/model/{id}" });
             conformance.add(success, { endpoint: "/model/{id}" });
-        });
+        }));
 
-        group("test unknown model response", () => {
+        group("test unknown model response", dontCrash(() => {
             let id = 'tts_models.en.unknown';
 
             let url = BASE_URL + `/model/${id}`;
@@ -136,7 +148,7 @@ export default function() {
                 "Response code of 404 (not found)": (r) => r.status === 404
             }, { endpoint: "/model/{id}" });
             conformance.add(success, { endpoint: "/model/{id}" });
-        });
+        }));
     });
 
 }
